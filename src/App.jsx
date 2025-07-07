@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import * as Tone from 'tone';
 
 // --- Firebase Configuration ---
+// eslint-disable-next-line no-undef
 const firebaseConfig = typeof __firebase_config !== 'undefined' 
     ? JSON.parse(__firebase_config) 
     : { apiKey: "...", authDomain: "...", projectId: "...", storageBucket: "...", messagingSenderId: "...", appId: "..." };
@@ -18,6 +19,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 // --- Firestore Path Configuration ---
+// eslint-disable-next-line no-undef
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-poker-app';
 const roomsCollectionPath = `artifacts/${appId}/public/data/pokerRooms`;
 const profilesCollectionPath = `artifacts/${appId}/public/data/profiles`;
@@ -702,6 +704,7 @@ export default function App() {
 
         const signIn = async () => {
             try {
+                // eslint-disable-next-line no-undef
                 const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
                 if (token) {
                     await signInWithCustomToken(auth, token);
@@ -760,7 +763,7 @@ export default function App() {
                     const players = { ...roomData.players };
                     delete players[user.uid];
 
-                    if (Object.keys(players).length === 0 && roomData.type === 'custom') {
+                    if (Object.keys(players).length === 0 && (roomData.type === 'custom' || roomData.type === 'normal' || roomData.type === 'ranked')) {
                         await deleteDoc(roomRef);
                     } else {
                         await updateDoc(roomRef, { players });
