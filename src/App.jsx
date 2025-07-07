@@ -1,3 +1,4 @@
+/* global __firebase_config, __app_id, __initial_auth_token */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'firebase/auth';
@@ -9,7 +10,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import * as Tone from 'tone';
 
 // --- Firebase Configuration ---
-// eslint-disable-next-line no-undef
 const firebaseConfig = typeof __firebase_config !== 'undefined' 
     ? JSON.parse(__firebase_config) 
     : { apiKey: "...", authDomain: "...", projectId: "...", storageBucket: "...", messagingSenderId: "...", appId: "..." };
@@ -19,7 +19,6 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 // --- Firestore Path Configuration ---
-// eslint-disable-next-line no-undef
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-poker-app';
 const roomsCollectionPath = `artifacts/${appId}/public/data/pokerRooms`;
 const profilesCollectionPath = `artifacts/${appId}/public/data/profiles`;
@@ -112,7 +111,7 @@ const getBestFiveCardHand = (cards) => {
     return { rank: 0, name: 'ハイカード', value, cards: sorted };
 };
 const evaluateHand = (sevenCards) => {
-    if (sevenCards.length < 5) return { rank: -1, name: '', value: 0, cards: [] };
+    if (!sevenCards || sevenCards.length < 5) return { rank: -1, name: '', value: 0, cards: [] };
     const combinations = getCombinations(sevenCards, 5);
     return combinations.map(getBestFiveCardHand).reduce((best, current) => {
         if (!best) return current;
@@ -135,7 +134,7 @@ const gameLogic = {
         const roomRef = doc(db, roomsCollectionPath, roomId);
         const playerIds = Object.keys(room.players).filter(id => room.players[id].chips > 0);
         if (playerIds.length < 2) {
-            await updateDoc(roomRef, { log: [...room.log, "プレイヤーが2人未満のため、ゲームを開始できません。"] });
+            await updateDoc(roomRef, { log: [...(room.log || []), "プレイヤーが2人未満のため、ゲームを開始できません。"] });
             return;
         }
 
@@ -376,7 +375,7 @@ const GameRoom = ({ roomId, user, backToLobby }) => {
 
     const getBestHandName = (playerId) => {
         const player = players[playerId];
-        if (stage === 'river' && !player.folded && player.hand.length > 0) {
+        if (stage === 'river' && !player.folded && player.hand?.length > 0) {
             return evaluateHand([...player.hand, ...communityCards])?.name;
         }
         return '';
@@ -415,7 +414,7 @@ const GameRoom = ({ roomId, user, backToLobby }) => {
             <div className="grid grid-cols-3 grid-rows-3 flex-grow relative">
                 {Object.keys(players).filter(id => id !== user.uid).map((id, index) => (
                      <div key={id} className={`absolute ${index === 0 ? 'top-0 left-1/2 -translate-x-1/2' : index === 1 ? 'top-1/2 -translate-y-1/2 left-0' : 'top-1/2 -translate-y-1/2 right-0'}`}>
-                        <Player player={players[id]} isCurrentPlayer={currentPlayerId === id} isDealer={dealerId === id} hand={players[id].hand.map(c => (status === 'showdown' || stage === 'river') && !players[id].folded ? c : {suit: '?', rank: '?' })} bestHandName={getBestHandName(id)} />
+                        <Player player={players[id]} isCurrentPlayer={currentPlayerId === id} isDealer={dealerId === id} hand={(players[id].hand || []).map(c => (status === 'showdown' || stage === 'river') && !players[id].folded ? c : {suit: '?', rank: '?' })} bestHandName={getBestHandName(id)} />
                     </div>
                 ))}
                 <div className="col-start-2 row-start-2 flex flex-col items-center justify-center">
@@ -425,7 +424,7 @@ const GameRoom = ({ roomId, user, backToLobby }) => {
                     </div>
                 </div>
                 <div className="col-start-2 row-start-3 flex items-center justify-center">
-                     <Player player={myPlayer} isCurrentPlayer={currentPlayerId === user.uid} isDealer={dealerId === user.uid} hand={myPlayer.hand} bestHandName={getBestHandName(user.uid)} />
+                     <Player player={myPlayer} isCurrentPlayer={currentPlayerId === user.uid} isDealer={dealerId === user.uid} hand={myPlayer.hand || []} bestHandName={getBestHandName(user.uid)} />
                 </div>
             </div>
             {status === 'playing' && (
