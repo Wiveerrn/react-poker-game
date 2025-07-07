@@ -1,4 +1,6 @@
 /* global __firebase_config, __app_id, __initial_auth_token */
+/* eslint-disable no-undef */
+
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'firebase/auth';
