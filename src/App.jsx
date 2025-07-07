@@ -1,5 +1,4 @@
 /* global __firebase_config, __app_id, __initial_auth_token */
-/* eslint-disable no-undef */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { initializeApp } from 'firebase/app';
@@ -12,9 +11,26 @@ import { motion, AnimatePresence } from 'framer-motion';
 import * as Tone from 'tone';
 
 // --- Firebase Configuration ---
-const firebaseConfig = typeof __firebase_config !== 'undefined' 
-    ? JSON.parse(__firebase_config) 
-    : { apiKey: "...", authDomain: "...", projectId: "...", storageBucket: "...", messagingSenderId: "...", appId: "..." };
+let firebaseConfig;
+
+// Safely access environment variables for Vercel deployment
+if (typeof process !== 'undefined' && process.env.REACT_APP_FIREBASE_CONFIG) {
+    firebaseConfig = JSON.parse(process.env.REACT_APP_FIREBASE_CONFIG);
+} else if (typeof __firebase_config !== 'undefined') {
+    // Fallback for different environments
+    firebaseConfig = JSON.parse(__firebase_config);
+} else {
+    // Default placeholder for local development without environment variables
+    firebaseConfig = { 
+        apiKey: "...", 
+        authDomain: "...", 
+        projectId: "...", 
+        storageBucket: "...", 
+        messagingSenderId: "...", 
+        appId: "..." 
+    };
+}
+
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -705,7 +721,6 @@ export default function App() {
 
         const signIn = async () => {
             try {
-                // eslint-disable-next-line no-undef
                 const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
                 if (token) {
                     await signInWithCustomToken(auth, token);
