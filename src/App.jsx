@@ -16,23 +16,30 @@ let firebaseConfig;
 
 try {
     // This logic handles different environments gracefully.
-    // 1. Check for the specific environment variable provided here.
-    if (typeof __firebase_config !== 'undefined') {
+    // 1. Check for the specific environment variable provided in this interactive environment.
+    if (typeof __firebase_config !== 'undefined' && __firebase_config) {
         firebaseConfig = JSON.parse(__firebase_config);
     } 
-    // 2. Check for Vercel's environment variable.
-    else if (typeof process !== 'undefined' && process.env.REACT_APP_FIREBASE_CONFIG) {
+    // 2. Check for Vercel's environment variable. The `process` object is specific to Node.js environments and build tools like Create React App.
+    else if (typeof process !== 'undefined' && process.env && process.env.REACT_APP_FIREBASE_CONFIG) {
         firebaseConfig = JSON.parse(process.env.REACT_APP_FIREBASE_CONFIG);
     } 
     // 3. Fallback if no configuration is found.
     else {
-        throw new Error("Firebase config not found.");
+        throw new Error("Firebase config not found in any known environment variables.");
     }
 } catch (error) {
     console.error("FATAL: Firebase configuration is missing or invalid. Please check your Vercel Environment Variables.", error);
     // Use a placeholder to avoid the app crashing immediately on initialization.
-    // The authentication will fail, but the app will at least load.
-    firebaseConfig = { apiKey: "invalid", authDomain: "invalid.firebaseapp.com", projectId: "invalid", storageBucket: "invalid.appspot.com", messagingSenderId: "invalid", appId: "invalid" };
+    // The authentication will fail, but the app will at least load, allowing for better debugging.
+    firebaseConfig = { 
+        apiKey: "invalid", 
+        authDomain: "invalid.firebaseapp.com", 
+        projectId: "invalid", 
+        storageBucket: "invalid.appspot.com", 
+        messagingSenderId: "invalid", 
+        appId: "invalid" 
+    };
 }
 
 
