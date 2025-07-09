@@ -14,21 +14,23 @@ import * as Tone from 'tone';
 // --- Firebase Configuration ---
 let firebaseConfig;
 
-// Safely access environment variables for Vercel deployment
+// Safely access environment variables for Vercel deployment and other environments
 if (typeof process !== 'undefined' && process.env.REACT_APP_FIREBASE_CONFIG) {
     firebaseConfig = JSON.parse(process.env.REACT_APP_FIREBASE_CONFIG);
 } else if (typeof __firebase_config !== 'undefined') {
-    // Fallback for different environments
     firebaseConfig = JSON.parse(__firebase_config);
 } else {
-    // Default placeholder for local development without environment variables
-    firebaseConfig = { 
-        apiKey: "...", 
-        authDomain: "...", 
-        projectId: "...", 
-        storageBucket: "...", 
-        messagingSenderId: "...", 
-        appId: "..." 
+    // This is a fallback for local development if no env vars are set.
+    // It will cause an API key error if used in production.
+    console.error("Firebase config not found. Please set up your environment variables.");
+    firebaseConfig = {
+        apiKey: "AIzaSyA1ayOUCpLI5xtHkGSVP900vGZagASECEA",
+        authDomain: "debt-7f307.firebaseapp.com",
+        projectId: "debt-7f307",
+        storageBucket: "debt-7f307.firebasestorage.app",
+        messagingSenderId: "111463937012",
+        appId: "1:111463937012:web:c72fbdcb3c8f9797f67fa1",
+        measurementId: "G-ZYC2JB9V9Z"
     };
 }
 
