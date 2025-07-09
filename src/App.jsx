@@ -14,24 +14,26 @@ import * as Tone from 'tone';
 // --- Firebase Configuration ---
 let firebaseConfig;
 
-try {
-    // This logic handles different environments gracefully.
-    // 1. Check for the specific environment variable provided in this interactive environment.
-    if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-        firebaseConfig = JSON.parse(__firebase_config);
-    } 
-    // 2. Check for Vercel's environment variable. The `process` object is specific to Node.js environments and build tools like Create React App.
-    else if (typeof process !== 'undefined' && process.env && process.env.REACT_APP_FIREBASE_CONFIG) {
-        firebaseConfig = JSON.parse(process.env.REACT_APP_FIREBASE_CONFIG);
-    } 
-    // 3. Fallback if no configuration is found.
-    else {
-        throw new Error("Firebase config not found in any known environment variables.");
-    }
-} catch (error) {
-    console.error("FATAL: Firebase configuration is missing or invalid. Please check your Vercel Environment Variables.", error);
-    // Use a placeholder to avoid the app crashing immediately on initialization.
-    // The authentication will fail, but the app will at least load, allowing for better debugging.
+// This logic handles different environments gracefully.
+// 1. Check for the specific environment variable provided in this interactive environment.
+if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+    firebaseConfig = JSON.parse(__firebase_config);
+} 
+// 2. Check for Vercel's environment variables.
+else if (typeof process !== 'undefined' && process.env) {
+    firebaseConfig = {
+      apiKey: process.env.REACT_APP_API_KEY,
+      authDomain: process.env.REACT_APP_AUTH_DOMAIN,
+      projectId: process.env.REACT_APP_PROJECT_ID,
+      storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
+      messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
+      appId: process.env.REACT_APP_APP_ID,
+      measurementId: process.env.REACT_APP_MEASUREMENT_ID,
+    };
+}
+// 3. Fallback if no configuration is found.
+else {
+    console.error("FATAL: Firebase configuration is missing or invalid. Please check your environment variables.");
     firebaseConfig = { 
         apiKey: "invalid", 
         authDomain: "invalid.firebaseapp.com", 
