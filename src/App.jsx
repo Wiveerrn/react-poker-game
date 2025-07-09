@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /* global __firebase_config, __app_id, __initial_auth_token */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -365,6 +366,15 @@ const GameRoom = ({ roomId, user, backToLobby }) => {
 
     const myPlayer = useMemo(() => room?.players?.[user.uid], [room, user]);
     const myTurn = useMemo(() => room && room.currentPlayerId === user.uid && room.status === 'playing', [room, user]);
+
+    const handlePlayerAction = useCallback(async (action, amount = 0) => {
+        if (!myTurn) return;
+        const roomDocRef = doc(db, roomsCollectionPath, roomId);
+        await updateDoc(roomDocRef, {
+            [`players.${user.uid}.actionRequest`]: { action, amount, timestamp: serverTimestamp() }
+        });
+        playSound(action === 'fold' ? 'fold' : (action === 'check' ? 'check' : 'chip'));
+    }, [myTurn, roomId, user.uid]);
 
     useEffect(() => {
         if (room) {
