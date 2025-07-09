@@ -14,24 +14,25 @@ import * as Tone from 'tone';
 // --- Firebase Configuration ---
 let firebaseConfig;
 
-// Safely access environment variables for Vercel deployment and other environments
-if (typeof process !== 'undefined' && process.env.REACT_APP_FIREBASE_CONFIG) {
-    firebaseConfig = JSON.parse(process.env.REACT_APP_FIREBASE_CONFIG);
-} else if (typeof __firebase_config !== 'undefined') {
-    firebaseConfig = JSON.parse(__firebase_config);
-} else {
-    // This is a fallback for local development if no env vars are set.
-    // It will cause an API key error if used in production.
-    console.error("Firebase config not found. Please set up your environment variables.");
-    firebaseConfig = {
-        apiKey: "AIzaSyA1ayOUCpLI5xtHkGSVP900vGZagASECEA",
-        authDomain: "debt-7f307.firebaseapp.com",
-        projectId: "debt-7f307",
-        storageBucket: "debt-7f307.firebasestorage.app",
-        messagingSenderId: "111463937012",
-        appId: "1:111463937012:web:c72fbdcb3c8f9797f67fa1",
-        measurementId: "G-ZYC2JB9V9Z"
-    };
+try {
+    // This logic handles different environments gracefully.
+    // 1. Check for the specific environment variable provided here.
+    if (typeof __firebase_config !== 'undefined') {
+        firebaseConfig = JSON.parse(__firebase_config);
+    } 
+    // 2. Check for Vercel's environment variable.
+    else if (typeof process !== 'undefined' && process.env.REACT_APP_FIREBASE_CONFIG) {
+        firebaseConfig = JSON.parse(process.env.REACT_APP_FIREBASE_CONFIG);
+    } 
+    // 3. Fallback if no configuration is found.
+    else {
+        throw new Error("Firebase config not found.");
+    }
+} catch (error) {
+    console.error("FATAL: Firebase configuration is missing or invalid. Please check your Vercel Environment Variables.", error);
+    // Use a placeholder to avoid the app crashing immediately on initialization.
+    // The authentication will fail, but the app will at least load.
+    firebaseConfig = { apiKey: "invalid", authDomain: "invalid.firebaseapp.com", projectId: "invalid", storageBucket: "invalid.appspot.com", messagingSenderId: "invalid", appId: "invalid" };
 }
 
 
